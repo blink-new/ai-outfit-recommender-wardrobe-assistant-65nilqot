@@ -44,9 +44,11 @@ const translations = {
     enterDescription: 'Enter a description of this item',
     description: 'Description',
     selectCategory: 'Select Category',
+    selectType: 'Select Type',
     selectColor: 'Select Color',
     selectStyle: 'Select Style',
     selectSeason: 'Select Season',
+    saving: 'Saving...',
     
     // Upgrade System
     upgradeRequired: 'Upgrade Required',
@@ -121,6 +123,10 @@ const translations = {
     loading: 'Loading...',
     error: 'Error',
     tryAgain: 'Try Again',
+    delete: 'Delete',
+    deleteItem: 'Delete Item',
+    deleteConfirmation: 'Are you sure you want to delete',
+    failedToDelete: 'Failed to delete the item. Please try again.',
   },
   es: {
     // Navigation
@@ -162,9 +168,11 @@ const translations = {
     enterDescription: 'Ingresa una descripción de este artículo',
     description: 'Descripción',
     selectCategory: 'Seleccionar Categoría',
+    selectType: 'Seleccionar Tipo',
     selectColor: 'Seleccionar Color',
     selectStyle: 'Seleccionar Estilo',
     selectSeason: 'Seleccionar Temporada',
+    saving: 'Guardando...',
     
     // Upgrade System
     upgradeRequired: 'Actualización Requerida',
@@ -239,6 +247,10 @@ const translations = {
     loading: 'Cargando...',
     error: 'Error',
     tryAgain: 'Intentar de Nuevo',
+    delete: 'Eliminar',
+    deleteItem: 'Eliminar Artículo',
+    deleteConfirmation: '¿Estás seguro de que quieres eliminar',
+    failedToDelete: 'Error al eliminar el artículo. Inténtalo de nuevo.',
   },
 };
 

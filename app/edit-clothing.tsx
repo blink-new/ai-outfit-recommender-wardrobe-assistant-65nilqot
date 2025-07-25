@@ -17,15 +17,14 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useLocalSearchParams, router } from 'expo-router';
 import { blink } from '@/lib/blink';
 import { useLanguage } from '@/lib/i18n';
+import { 
+  CLOTHING_SUBDIVISIONS, 
+  CLOTHING_STYLES, 
+  CLOTHING_SEASONS, 
+  CLOTHING_COLORS 
+} from '@/lib/clothingTypes';
 
 const CATEGORIES = ['tops', 'bottoms', 'shoes', 'accessories', 'outerwear'];
-const STYLES = ['casual', 'formal', 'sporty', 'elegant', 'vintage', 'trendy'];
-const SEASONS = ['spring', 'summer', 'fall', 'winter', 'all'];
-
-const COLORS = [
-  'black', 'white', 'gray', 'red', 'blue', 'green', 'yellow', 'orange',
-  'purple', 'pink', 'brown', 'beige', 'navy', 'maroon', 'teal', 'coral'
-];
 
 export default function EditClothingScreen() {
   const { t } = useLanguage();
@@ -48,6 +47,7 @@ export default function EditClothingScreen() {
   });
 
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+  const [showSubcategoryPicker, setShowSubcategoryPicker] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showStylePicker, setShowStylePicker] = useState(false);
   const [showSeasonPicker, setShowSeasonPicker] = useState(false);
@@ -93,8 +93,10 @@ export default function EditClothingScreen() {
     return { needed: false, price: 0, limit: 15 };
   };
 
+  const [isSaving, setIsSaving] = useState(false);
+
   const saveClothingItem = async () => {
-    if (!user) return;
+    if (!user || isSaving) return;
 
     const upgradeInfo = checkUpgradeNeeded();
     
@@ -102,6 +104,8 @@ export default function EditClothingScreen() {
       setShowUpgradeModal(true);
       return;
     }
+
+    setIsSaving(true);
 
     try {
       await blink.db.clothingItems.create({
@@ -128,6 +132,8 @@ export default function EditClothingScreen() {
     } catch (error) {
       console.error('Error saving clothing item:', error);
       Alert.alert(t('error'), t('failedToSave'));
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -296,13 +302,15 @@ export default function EditClothingScreen() {
           {/* Subcategory */}
           <View style={styles.fieldGroup}>
             <Text style={styles.fieldLabel}>{t('type')}</Text>
-            <TextInput
-              style={styles.textInput}
-              value={editedItem.subcategory}
-              onChangeText={(text) => setEditedItem({ ...editedItem, subcategory: text })}
-              placeholder={t('enterClothingType')}
-              placeholderTextColor="#999"
-            />
+            <TouchableOpacity
+              style={styles.fieldButton}
+              onPress={() => setShowSubcategoryPicker(true)}
+            >
+              <Text style={styles.fieldValue}>
+                {editedItem.subcategory || t('selectType')}
+              </Text>
+              <Ionicons name="chevron-down" size={20} color="#666" />
+            </TouchableOpacity>
           </View>
 
           {/* Color */}
@@ -362,11 +370,18 @@ export default function EditClothingScreen() {
         {/* Save Button */}
         <Animated.View entering={FadeInDown.delay(300)} style={styles.saveSection}>
           <TouchableOpacity
-            style={styles.saveButton}
+            style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
             onPress={saveClothingItem}
+            disabled={isSaving}
           >
-            <Ionicons name="checkmark-circle" size={24} color="#FEFEFE" />
-            <Text style={styles.saveButtonText}>{t('saveToWardrobe')}</Text>
+            <Ionicons 
+              name={isSaving ? "hourglass" : "checkmark-circle"} 
+              size={24} 
+              color="#FEFEFE" 
+            />
+            <Text style={styles.saveButtonText}>
+              {isSaving ? t('saving') : t('saveToWardrobe')}
+            </Text>
           </TouchableOpacity>
         </Animated.View>
       </ScrollView>
@@ -377,14 +392,23 @@ export default function EditClothingScreen() {
         () => setShowCategoryPicker(false),
         CATEGORIES,
         editedItem.category,
-        (value) => setEditedItem({ ...editedItem, category: value }),
+        (value) => setEditedItem({ ...editedItem, category: value, subcategory: '' }),
         t('selectCategory')
+      )}
+
+      {renderPicker(
+        showSubcategoryPicker,
+        () => setShowSubcategoryPicker(false),
+        CLOTHING_SUBDIVISIONS[editedItem.category as keyof typeof CLOTHING_SUBDIVISIONS] || [],
+        editedItem.subcategory,
+        (value) => setEditedItem({ ...editedItem, subcategory: value }),
+        t('selectType')
       )}
 
       {renderPicker(
         showColorPicker,
         () => setShowColorPicker(false),
-        COLORS,
+        CLOTHING_COLORS,
         editedItem.color,
         (value) => setEditedItem({ ...editedItem, color: value }),
         t('selectColor')
@@ -393,7 +417,7 @@ export default function EditClothingScreen() {
       {renderPicker(
         showStylePicker,
         () => setShowStylePicker(false),
-        STYLES,
+        CLOTHING_STYLES,
         editedItem.style,
         (value) => setEditedItem({ ...editedItem, style: value }),
         t('selectStyle')
@@ -402,7 +426,7 @@ export default function EditClothingScreen() {
       {renderPicker(
         showSeasonPicker,
         () => setShowSeasonPicker(false),
-        SEASONS,
+        CLOTHING_SEASONS,
         editedItem.season,
         (value) => setEditedItem({ ...editedItem, season: value }),
         t('selectSeason')
@@ -514,6 +538,9 @@ const styles = StyleSheet.create({
     color: '#FEFEFE',
     fontSize: 18,
     fontWeight: '700',
+  },
+  saveButtonDisabled: {
+    opacity: 0.6,
   },
   modalOverlay: {
     flex: 1,

@@ -8,6 +8,7 @@ import {
   Dimensions,
   RefreshControl,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -82,6 +83,29 @@ export default function WardrobeScreen() {
     setRefreshing(true);
     await loadClothingItems();
     setRefreshing(false);
+  };
+
+  const deleteClothingItem = async (itemId: string, itemName: string) => {
+    Alert.alert(
+      t('deleteItem'),
+      `${t('deleteConfirmation')} ${itemName}?`,
+      [
+        { text: t('cancel'), style: 'cancel' },
+        {
+          text: t('delete'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await blink.db.clothingItems.delete(itemId);
+              await loadClothingItems(); // Refresh the list
+            } catch (error) {
+              console.error('Error deleting item:', error);
+              Alert.alert(t('error'), t('failedToDelete'));
+            }
+          }
+        }
+      ]
+    );
   };
 
   const filteredItems = selectedCategory === 'all' 
@@ -159,7 +183,10 @@ export default function WardrobeScreen() {
                 key={item.id}
                 entering={FadeInDown.delay(index * 50)}
               >
-                <TouchableOpacity style={styles.gridItem}>
+                <TouchableOpacity 
+                  style={styles.gridItem}
+                  onLongPress={() => deleteClothingItem(item.id, item.subcategory || item.category)}
+                >
                   <Image
                     source={{ uri: item.imageUrl }}
                     style={styles.itemImage}
@@ -169,6 +196,9 @@ export default function WardrobeScreen() {
                     <Text style={styles.itemCategory}>
                       {item.subcategory || item.category}
                     </Text>
+                  </View>
+                  <View style={styles.deleteHint}>
+                    <Ionicons name="trash-outline" size={16} color="rgba(255,255,255,0.7)" />
                   </View>
                 </TouchableOpacity>
               </Animated.View>
@@ -265,6 +295,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     textTransform: 'capitalize',
+  },
+  deleteHint: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 12,
+    padding: 4,
   },
   emptyState: {
     alignItems: 'center',
