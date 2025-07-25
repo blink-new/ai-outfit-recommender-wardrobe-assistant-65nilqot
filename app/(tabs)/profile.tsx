@@ -12,8 +12,10 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { blink } from '@/lib/blink';
+import { useLanguage, Language } from '@/lib/i18n';
 
 export default function ProfileScreen() {
+  const { t, language, changeLanguage } = useLanguage();
   const [user, setUser] = useState(null);
   const [stats, setStats] = useState({
     totalClothes: 0,
@@ -63,12 +65,36 @@ export default function ProfileScreen() {
     }
   };
 
+  const handleLanguageChange = () => {
+    Alert.alert(
+      t('language'),
+      'Select your preferred language / Selecciona tu idioma preferido',
+      [
+        { text: t('cancel'), style: 'cancel' },
+        {
+          text: `🇺🇸 ${t('english')}`,
+          onPress: () => {
+            changeLanguage('en');
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          },
+        },
+        {
+          text: `🇪🇸 ${t('spanish')}`,
+          onPress: () => {
+            changeLanguage('es');
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          },
+        },
+      ]
+    );
+  };
+
   const handleLogout = () => {
     Alert.alert(
       'Sign Out',
       'Are you sure you want to sign out?',
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('cancel'), style: 'cancel' },
         {
           text: 'Sign Out',
           style: 'destructive',
@@ -86,7 +112,7 @@ export default function ProfileScreen() {
       'Clear Wardrobe',
       'This will delete all your clothes and outfit recommendations. This action cannot be undone.',
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('cancel'), style: 'cancel' },
         {
           text: 'Clear All',
           style: 'destructive',
@@ -98,7 +124,7 @@ export default function ProfileScreen() {
               Alert.alert('Success', 'Wardrobe cleared successfully');
               loadStats();
             } catch (error) {
-              Alert.alert('Error', 'Failed to clear wardrobe');
+              Alert.alert(t('error'), 'Failed to clear wardrobe');
             }
           },
         },
@@ -109,6 +135,12 @@ export default function ProfileScreen() {
   if (!user) return null;
 
   const menuItems = [
+    {
+      icon: 'language-outline',
+      title: t('language'),
+      subtitle: `${language === 'en' ? '🇺🇸 English' : '🇪🇸 Español'}`,
+      onPress: handleLanguageChange,
+    },
     {
       icon: 'person-outline',
       title: 'Edit Profile',
@@ -170,11 +202,11 @@ export default function ProfileScreen() {
         <Animated.View entering={FadeInDown.delay(200)} style={styles.statsContainer}>
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>{stats.totalClothes}</Text>
-            <Text style={styles.statLabel}>Clothes</Text>
+            <Text style={styles.statLabel}>{t('totalItems')}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>{stats.totalOutfits}</Text>
-            <Text style={styles.statLabel}>Outfits</Text>
+            <Text style={styles.statLabel}>{t('outfitsCreated')}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statNumber} numberOfLines={1}>

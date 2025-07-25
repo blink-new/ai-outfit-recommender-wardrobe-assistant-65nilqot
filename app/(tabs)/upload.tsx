@@ -15,8 +15,10 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { blink } from '@/lib/blink';
+import { useLanguage } from '@/lib/i18n';
 
 export default function UploadScreen() {
+  const { t } = useLanguage();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
@@ -32,7 +34,7 @@ export default function UploadScreen() {
   const requestPermissions = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission needed', 'We need camera roll permissions to upload photos');
+      Alert.alert(t('error'), 'We need camera roll permissions to upload photos');
       return false;
     }
     return true;
@@ -126,7 +128,7 @@ export default function UploadScreen() {
 
     } catch (error) {
       console.error('Error analyzing clothing:', error);
-      Alert.alert('Error', 'Failed to analyze the clothing item. Please try again.');
+      Alert.alert(t('error'), 'Failed to analyze the clothing item. Please try again.');
     } finally {
       setIsAnalyzing(false);
     }
@@ -150,12 +152,12 @@ export default function UploadScreen() {
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert('Success!', 'Clothing item added to your wardrobe', [
-        { text: 'Add Another', onPress: resetForm },
-        { text: 'View Wardrobe', onPress: resetForm }
+        { text: t('addClothes'), onPress: resetForm },
+        { text: t('wardrobe'), onPress: resetForm }
       ]);
     } catch (error) {
       console.error('Error saving clothing item:', error);
-      Alert.alert('Error', 'Failed to save the clothing item. Please try again.');
+      Alert.alert(t('error'), 'Failed to save the clothing item. Please try again.');
     }
   };
 
@@ -171,8 +173,8 @@ export default function UploadScreen() {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <Animated.View entering={FadeInDown.delay(100)} style={styles.header}>
-          <Text style={styles.title}>Add New Clothes</Text>
-          <Text style={styles.subtitle}>Take a photo or choose from gallery</Text>
+          <Text style={styles.title}>{t('addNewClothing')}</Text>
+          <Text style={styles.subtitle}>{t('takePhoto')} or {t('chooseFromGallery').toLowerCase()}</Text>
         </Animated.View>
 
         {/* Image Selection */}
@@ -185,7 +187,7 @@ export default function UploadScreen() {
               >
                 <View style={styles.uploadButtonContent}>
                   <Ionicons name="camera" size={32} color="#FF6B6B" />
-                  <Text style={styles.uploadButtonText}>Take Photo</Text>
+                  <Text style={styles.uploadButtonText}>{t('takePhoto')}</Text>
                 </View>
               </TouchableOpacity>
 
@@ -195,7 +197,7 @@ export default function UploadScreen() {
               >
                 <View style={styles.uploadButtonContent}>
                   <Ionicons name="images" size={32} color="#4ECDC4" />
-                  <Text style={styles.uploadButtonText}>Choose Photo</Text>
+                  <Text style={styles.uploadButtonText}>{t('chooseFromGallery')}</Text>
                 </View>
               </TouchableOpacity>
             </View>
@@ -210,7 +212,7 @@ export default function UploadScreen() {
                 onPress={resetForm}
               >
                 <Ionicons name="refresh" size={20} color="#666" />
-                <Text style={styles.secondaryButtonText}>Choose Different</Text>
+                <Text style={styles.secondaryButtonText}>{t('chooseFromGallery')}</Text>
               </TouchableOpacity>
 
               {!analysisResult && (
@@ -225,7 +227,7 @@ export default function UploadScreen() {
                     <Ionicons name="sparkles" size={20} color="#FEFEFE" />
                   )}
                   <Text style={styles.primaryButtonText}>
-                    {isAnalyzing ? 'Analyzing...' : 'Analyze with AI'}
+                    {isAnalyzing ? t('analyzing') : 'Analyze with AI'}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -236,31 +238,31 @@ export default function UploadScreen() {
         {/* Analysis Results */}
         {analysisResult && (
           <Animated.View entering={FadeInUp.delay(200)} style={styles.resultsSection}>
-            <Text style={styles.resultsTitle}>AI Analysis Results</Text>
+            <Text style={styles.resultsTitle}>{t('clothingDetails')}</Text>
             
             <View style={styles.resultCard}>
               <View style={styles.resultRow}>
-                <Text style={styles.resultLabel}>Category:</Text>
+                <Text style={styles.resultLabel}>{t('type')}:</Text>
                 <Text style={styles.resultValue}>{analysisResult.category}</Text>
               </View>
               
               <View style={styles.resultRow}>
-                <Text style={styles.resultLabel}>Type:</Text>
+                <Text style={styles.resultLabel}>{t('type')}:</Text>
                 <Text style={styles.resultValue}>{analysisResult.subcategory}</Text>
               </View>
               
               <View style={styles.resultRow}>
-                <Text style={styles.resultLabel}>Color:</Text>
+                <Text style={styles.resultLabel}>{t('color')}:</Text>
                 <Text style={styles.resultValue}>{analysisResult.color}</Text>
               </View>
               
               <View style={styles.resultRow}>
-                <Text style={styles.resultLabel}>Style:</Text>
+                <Text style={styles.resultLabel}>{t('style')}:</Text>
                 <Text style={styles.resultValue}>{analysisResult.style}</Text>
               </View>
               
               <View style={styles.resultRow}>
-                <Text style={styles.resultLabel}>Season:</Text>
+                <Text style={styles.resultLabel}>{t('season')}:</Text>
                 <Text style={styles.resultValue}>{analysisResult.season}</Text>
               </View>
               
@@ -272,7 +274,7 @@ export default function UploadScreen() {
               onPress={saveClothingItem}
             >
               <Ionicons name="checkmark-circle" size={24} color="#FEFEFE" />
-              <Text style={styles.saveButtonText}>Add to Wardrobe</Text>
+              <Text style={styles.saveButtonText}>{t('saveToWardrobe')}</Text>
             </TouchableOpacity>
           </Animated.View>
         )}

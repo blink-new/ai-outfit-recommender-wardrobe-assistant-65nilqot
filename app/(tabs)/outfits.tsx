@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown, FadeInUp, SlideInRight } from 'react-native-reanimated';
 import { blink } from '@/lib/blink';
+import { useLanguage } from '@/lib/i18n';
 
 const { width } = Dimensions.get('window');
 
@@ -27,52 +28,55 @@ interface OutfitRecommendation {
   aiExplanation: string;
 }
 
-const questions = [
+const getQuestionsForLanguage = (t: (key: string) => string) => [
   {
     id: 'occasion',
-    question: 'What\'s the occasion?',
+    question: t('question1'),
     emoji: '🎯',
     options: [
-      { value: 'casual', label: 'Casual Day', emoji: '😎' },
-      { value: 'work', label: 'Work/Business', emoji: '💼' },
-      { value: 'date', label: 'Date Night', emoji: '💕' },
-      { value: 'party', label: 'Party/Event', emoji: '🎉' },
-      { value: 'workout', label: 'Workout', emoji: '💪' },
+      { value: 'casual', label: t('casual'), emoji: '😎' },
+      { value: 'work', label: t('work'), emoji: '💼' },
+      { value: 'date', label: t('date'), emoji: '💕' },
+      { value: 'party', label: t('party'), emoji: '🎉' },
+      { value: 'workout', label: t('gym'), emoji: '💪' },
     ]
   },
   {
     id: 'weather',
-    question: 'What\'s the weather like?',
+    question: t('question2'),
     emoji: '🌤️',
     options: [
-      { value: 'hot', label: 'Hot & Sunny', emoji: '☀️' },
-      { value: 'warm', label: 'Warm', emoji: '🌤️' },
-      { value: 'cool', label: 'Cool', emoji: '🌥️' },
-      { value: 'cold', label: 'Cold', emoji: '❄️' },
-      { value: 'rainy', label: 'Rainy', emoji: '🌧️' },
+      { value: 'hot', label: t('hot'), emoji: '☀️' },
+      { value: 'warm', label: t('mild'), emoji: '🌤️' },
+      { value: 'cool', label: t('mild'), emoji: '🌥️' },
+      { value: 'cold', label: t('cold'), emoji: '❄️' },
+      { value: 'rainy', label: t('rainy'), emoji: '🌧️' },
     ]
   },
   {
     id: 'vibe',
-    question: 'What vibe are you going for?',
+    question: t('question3'),
     emoji: '✨',
     options: [
-      { value: 'comfortable', label: 'Comfortable', emoji: '🛋️' },
-      { value: 'stylish', label: 'Stylish', emoji: '💫' },
-      { value: 'professional', label: 'Professional', emoji: '👔' },
-      { value: 'trendy', label: 'Trendy', emoji: '🔥' },
-      { value: 'classic', label: 'Classic', emoji: '👑' },
+      { value: 'comfortable', label: t('comfortable'), emoji: '🛋️' },
+      { value: 'stylish', label: t('trendy'), emoji: '💫' },
+      { value: 'professional', label: t('work'), emoji: '👔' },
+      { value: 'trendy', label: t('trendy'), emoji: '🔥' },
+      { value: 'classic', label: t('elegant'), emoji: '👑' },
     ]
   }
 ];
 
 export default function OutfitsScreen() {
+  const { t } = useLanguage();
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [outfitRecommendations, setOutfitRecommendations] = useState<OutfitRecommendation[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [user, setUser] = useState(null);
   const [clothingItems, setClothingItems] = useState([]);
+  
+  const questions = getQuestionsForLanguage(t);
 
   useEffect(() => {
     const unsubscribe = blink.auth.onAuthStateChanged((state) => {
@@ -229,9 +233,9 @@ export default function OutfitsScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.emptyState}>
           <Ionicons name="shirt-outline" size={80} color="#E0E0E0" />
-          <Text style={styles.emptyTitle}>No clothes in wardrobe</Text>
+          <Text style={styles.emptyTitle}>{t('emptyWardrobe')}</Text>
           <Text style={styles.emptySubtitle}>
-            Add some clothes first to get outfit recommendations
+            {t('startAdding')}
           </Text>
         </View>
       </SafeAreaView>
@@ -243,8 +247,8 @@ export default function OutfitsScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingState}>
           <ActivityIndicator size="large" color="#FF6B6B" />
-          <Text style={styles.loadingTitle}>Creating your outfits...</Text>
-          <Text style={styles.loadingSubtitle}>AI is analyzing your wardrobe</Text>
+          <Text style={styles.loadingTitle}>{t('loading')}</Text>
+          <Text style={styles.loadingSubtitle}>{t('analyzing')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -308,10 +312,10 @@ export default function OutfitsScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Your Outfits</Text>
+        <Text style={styles.title}>{t('outfitRecommendations')}</Text>
         <TouchableOpacity style={styles.newOutfitButton} onPress={resetQuiz}>
           <Ionicons name="add" size={20} color="#FEFEFE" />
-          <Text style={styles.newOutfitButtonText}>New Outfit</Text>
+          <Text style={styles.newOutfitButtonText}>{t('getRecommendations')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -341,7 +345,7 @@ export default function OutfitsScreen() {
 
             {/* Recommended Items */}
             <View style={styles.itemsSection}>
-              <Text style={styles.sectionTitle}>Recommended Items:</Text>
+              <Text style={styles.sectionTitle}>{t('completeOutfit')}:</Text>
               {outfit.recommendedItems.map((item, itemIndex) => (
                 <View key={itemIndex} style={styles.itemRow}>
                   <Ionicons name="checkmark-circle" size={16} color="#4ECDC4" />
@@ -353,7 +357,7 @@ export default function OutfitsScreen() {
             {/* Missing Items */}
             {outfit.missingItems.length > 0 && (
               <View style={styles.itemsSection}>
-                <Text style={styles.sectionTitle}>Missing Items:</Text>
+                <Text style={styles.sectionTitle}>{t('missingItems')}:</Text>
                 {outfit.missingItems.map((item, itemIndex) => (
                   <View key={itemIndex} style={styles.itemRow}>
                     <Ionicons name="alert-circle" size={16} color="#FF6B6B" />

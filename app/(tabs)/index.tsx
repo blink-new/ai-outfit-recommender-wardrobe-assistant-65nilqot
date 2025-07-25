@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { blink } from '@/lib/blink';
+import { useLanguage } from '@/lib/i18n';
 
 const { width } = Dimensions.get('window');
 const itemSize = (width - 48) / 3; // 3 columns with padding
@@ -26,21 +27,24 @@ interface ClothingItem {
   aiDescription?: string;
 }
 
-const categories = [
-  { id: 'all', name: 'All', icon: 'grid-outline' },
-  { id: 'tops', name: 'Tops', icon: 'shirt-outline' },
-  { id: 'bottoms', name: 'Bottoms', icon: 'fitness-outline' },
-  { id: 'shoes', name: 'Shoes', icon: 'footsteps-outline' },
-  { id: 'accessories', name: 'Accessories', icon: 'watch-outline' },
-  { id: 'outerwear', name: 'Outerwear', icon: 'jacket-outline' },
+const getCategoriesForLanguage = (t: (key: string) => string) => [
+  { id: 'all', name: t('all'), icon: 'grid-outline' },
+  { id: 'tops', name: t('tops'), icon: 'shirt-outline' },
+  { id: 'bottoms', name: t('bottoms'), icon: 'fitness-outline' },
+  { id: 'shoes', name: t('shoes'), icon: 'footsteps-outline' },
+  { id: 'accessories', name: t('accessories'), icon: 'watch-outline' },
+  { id: 'outerwear', name: t('outerwear'), icon: 'jacket-outline' },
 ];
 
 export default function WardrobeScreen() {
+  const { t } = useLanguage();
   const [clothingItems, setClothingItems] = useState<ClothingItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [user, setUser] = useState(null);
+  
+  const categories = getCategoriesForLanguage(t);
 
   useEffect(() => {
     const unsubscribe = blink.auth.onAuthStateChanged((state) => {
@@ -90,8 +94,8 @@ export default function WardrobeScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>My Wardrobe</Text>
-        <Text style={styles.subtitle}>{clothingItems.length} items</Text>
+        <Text style={styles.title}>{t('myWardrobe')}</Text>
+        <Text style={styles.subtitle}>{clothingItems.length} {t('totalItems').toLowerCase()}</Text>
       </View>
 
       {/* Category Filter */}
@@ -143,9 +147,9 @@ export default function WardrobeScreen() {
         {filteredItems.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="shirt-outline" size={80} color="#E0E0E0" />
-            <Text style={styles.emptyTitle}>No clothes yet!</Text>
+            <Text style={styles.emptyTitle}>{t('emptyWardrobe')}</Text>
             <Text style={styles.emptySubtitle}>
-              Start by adding some clothes to your wardrobe
+              {t('startAdding')}
             </Text>
           </View>
         ) : (
