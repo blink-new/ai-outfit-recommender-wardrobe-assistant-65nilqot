@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { blink } from '@/lib/blink';
 import { useLanguage } from '@/lib/i18n';
@@ -58,9 +59,11 @@ export default function WardrobeScreen() {
   }, []);
 
   const loadClothingItems = async () => {
+    if (!user?.id) return;
+    
     try {
       const items = await blink.db.clothingItems.list({
-        where: { userId: user?.id },
+        where: { userId: user.id },
         orderBy: { createdAt: 'desc' },
       });
       
@@ -86,6 +89,9 @@ export default function WardrobeScreen() {
   };
 
   const deleteClothingItem = async (itemId: string, itemName: string) => {
+    // Add haptic feedback for long press
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    
     Alert.alert(
       t('deleteItem'),
       `${t('deleteConfirmation')} ${itemName}?`,
@@ -97,9 +103,11 @@ export default function WardrobeScreen() {
           onPress: async () => {
             try {
               await blink.db.clothingItems.delete(itemId);
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
               await loadClothingItems(); // Refresh the list
             } catch (error) {
               console.error('Error deleting item:', error);
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
               Alert.alert(t('error'), t('failedToDelete'));
             }
           }
@@ -186,6 +194,8 @@ export default function WardrobeScreen() {
                 <TouchableOpacity 
                   style={styles.gridItem}
                   onLongPress={() => deleteClothingItem(item.id, item.subcategory || item.category)}
+                  delayLongPress={500}
+                  activeOpacity={0.8}
                 >
                   <Image
                     source={{ uri: item.imageUrl }}

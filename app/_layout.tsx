@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { blink } from '@/lib/blink';
 
@@ -35,6 +35,20 @@ export default function RootLayout() {
         <Text style={{ fontSize: 16, color: '#666', textAlign: 'center', marginBottom: 20 }}>
           Sign in to start building your smart wardrobe and get personalized outfit recommendations
         </Text>
+        <TouchableOpacity
+          style={{
+            backgroundColor: '#FF6B6B',
+            paddingHorizontal: 32,
+            paddingVertical: 16,
+            borderRadius: 12,
+            marginTop: 20
+          }}
+          onPress={() => blink.auth.login()}
+        >
+          <Text style={{ color: '#FEFEFE', fontSize: 18, fontWeight: '600' }}>
+            Sign In to Continue
+          </Text>
+        </TouchableOpacity>
       </View>
     );
   }
