@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import { router } from 'expo-router';
 import { blink } from '@/lib/blink';
 import { useLanguage } from '@/lib/i18n';
 
@@ -134,31 +135,16 @@ export default function UploadScreen() {
     }
   };
 
-  const saveClothingItem = async () => {
-    if (!analysisResult || !user) return;
+  const editClothingItem = () => {
+    if (!analysisResult) return;
 
-    try {
-      await blink.db.clothingItems.create({
-        id: `clothing_${Date.now()}`,
-        userId: user.id,
-        imageUrl: analysisResult.imageUrl,
-        category: analysisResult.category,
-        subcategory: analysisResult.subcategory,
-        color: analysisResult.color,
-        style: analysisResult.style,
-        season: analysisResult.season,
-        aiDescription: analysisResult.description,
-      });
-
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert('Success!', 'Clothing item added to your wardrobe', [
-        { text: t('addClothes'), onPress: resetForm },
-        { text: t('wardrobe'), onPress: resetForm }
-      ]);
-    } catch (error) {
-      console.error('Error saving clothing item:', error);
-      Alert.alert(t('error'), 'Failed to save the clothing item. Please try again.');
-    }
+    // Navigate to edit screen with analysis result
+    router.push({
+      pathname: '/edit-clothing',
+      params: {
+        analysis: JSON.stringify(analysisResult)
+      }
+    });
   };
 
   const resetForm = () => {
@@ -271,10 +257,10 @@ export default function UploadScreen() {
 
             <TouchableOpacity
               style={styles.saveButton}
-              onPress={saveClothingItem}
+              onPress={editClothingItem}
             >
-              <Ionicons name="checkmark-circle" size={24} color="#FEFEFE" />
-              <Text style={styles.saveButtonText}>{t('saveToWardrobe')}</Text>
+              <Ionicons name="create-outline" size={24} color="#FEFEFE" />
+              <Text style={styles.saveButtonText}>{t('editClothingDetails')}</Text>
             </TouchableOpacity>
           </Animated.View>
         )}
